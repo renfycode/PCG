@@ -1,16 +1,13 @@
 class MetaAttrSaver(type):
     def __new__(cls, name, bases, namespace):
         current_annotations = namespace.get('__annotations__', {})
-        parents_attributes = {}
+        __fields__ = {}
 
         for base in bases:
-            if hasattr(base, '_parents_attributes'):
-                parents_attributes.update(base._parents_attributes)
-            if hasattr(base, '_current_attributes'):
-                parents_attributes.update(base._current_attributes)
-                
-        namespace['_current_attributes'] = current_annotations
-        namespace['_parents_attributes'] = parents_attributes
+            if hasattr(base, '__fields__'):
+                __fields__.update(base.__fields__)
+        __fields__.update(current_annotations)
+        namespace['__fields__'] = __fields__
         
         return super().__new__(cls, name, bases, namespace)
 
@@ -18,12 +15,12 @@ class MetaAttrSaver(type):
         instance = super().__call__()
         
         for key, value in kwargs.items():
-            if key in cls._current_attributes:
+            if key in cls.__fields__:
                 setattr(instance, key, value)
             else:
                 raise AttributeError(
                     f"'{key}' is not allowed. "
-                    f"Class {cls.__name__} only accepts: {list(cls._current_attributes.keys())}"
+                    f"Class {cls.__name__} only accepts: {list(cls.__fields__.keys())}"
                 )
         
         return instance

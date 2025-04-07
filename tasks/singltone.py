@@ -1,10 +1,10 @@
 class Singleton(type):
-    _instance = None
+    _instance = {}
 
     def __call__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super().__call__(*args, **kwargs)
-        return cls._instance
+        if cls not in cls._instance:
+            cls._instance[cls] = super().__call__(*args, **kwargs)
+        return cls._instance[cls]
 
 class MyClass(metaclass=Singleton):
     def __init__(self, value):
