@@ -9,3 +9,8 @@ class Singleton(type):
 class MyClass(metaclass=Singleton):
     def __init__(self, value):
         self.value = value
+
+
+class MyClassChild(MyClass):
+    def __init__(self, value=1):
+        super().__init__(value)
