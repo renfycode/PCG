@@ -5,27 +5,27 @@ from functools import wraps
 class ContextMethodMeta(type):
     def __call__(cls, *args, **kwargs):
         instance = super().__call__(*args, **kwargs)
-        instance._context_active = False
-        
+        instance._context = False
+
         @contextmanager
-        def context_manager_for_class():
-            instance._context_active = True
+        def _context():
+            instance._context = True
             try:
                 yield instance
             finally:
-                instance._context_active = False
-        
-        instance.context = context_manager_for_class()
+                instance._context = False
+
+        instance.context = _context()
         return instance
-    
+
 def contextmethod(func):
     @wraps(func)
     def wrapper(self, *args, **kwargs):
-        if not getattr(self, '_context_active', False):
+        if not getattr(self, '_context', False):
             raise Exception("Метод требует контекста")
-        return func(self, *args, **kwargs)
-    return wrapper
+        return func
 
+    return wrapper
 
 
 class MyOwnDBQueryBuilder(metaclass=ContextMethodMeta):
